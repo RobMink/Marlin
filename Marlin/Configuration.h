@@ -69,7 +69,7 @@
 #if ENABLED(MORGAN_SCARA)
 
   //#define DEBUG_SCARA_KINEMATICS
-  #define SCARA_FEEDRATE_SCALING // Convert XY feedrate from mm/s to degrees/s on the fly
+  //#define SCARA_FEEDRATE_SCALING // Convert XY feedrate from mm/s to degrees/s on the fly
 
   // If movement is choppy try lowering this value
   #define SCARA_SEGMENTS_PER_SECOND 160
@@ -776,7 +776,7 @@
 #if ENABLED(CLASSIC_JERK)
   #define DEFAULT_XJERK  5.0
   #define DEFAULT_YJERK  5.0
-  #define DEFAULT_ZJERK  0.3
+  #define DEFAULT_ZJERK  5.0
 
   //#define LIMITED_JERK_EDITING        // Limit edit via M205 or LCD to DEFAULT_aJERK * 2
   #if ENABLED(LIMITED_JERK_EDITING)
@@ -1059,7 +1059,7 @@
 // @section machine
 
 // The size of the print bed
-#define X_BED_SIZE 90
+#define X_BED_SIZE 84
 #define Y_BED_SIZE 90
 
 // Travel limits (mm) after homing, corresponding to endstop positions.
@@ -1068,7 +1068,7 @@
 #define Z_MIN_POS 0
 #define X_MAX_POS (X_BED_SIZE+X_MIN_POS)
 #define Y_MAX_POS (Y_BED_SIZE+Y_MIN_POS)
-#define Z_MAX_POS 135
+#define Z_MAX_POS 124
 
 /**
  * Software Endstops
@@ -1107,7 +1107,7 @@
  * For other boards you may need to define FIL_RUNOUT_PIN, FIL_RUNOUT2_PIN, etc.
  * By default the firmware assumes HIGH=FILAMENT PRESENT.
  */
-//#define FILAMENT_RUNOUT_SENSOR
+ //define FILAMENT_RUNOUT_SENSOR
 #if ENABLED(FILAMENT_RUNOUT_SENSOR)
   #define NUM_RUNOUT_SENSORS   1     // Number of sensors, up to one per extruder. Define a FIL_RUNOUT#_PIN for each.
   #define FIL_RUNOUT_INVERTING false // Set to true to invert the logic of the sensor.

@@ -110,16 +110,16 @@ void GcodeSuite::G0_G1(
       if (fast_move) feedrate_mm_s = old_feedrate;
     #endif
 
-    #if ENABLED(NANODLP_Z_SYNC)
-      #if ENABLED(NANODLP_ALL_AXIS)
-        #define _MOVE_SYNC parser.seenval('X') || parser.seenval('Y') || parser.seenval('Z')  // For any move wait and output sync message
-      #else
-        #define _MOVE_SYNC parser.seenval('Z')  // Only for Z move
-      #endif
-      if (_MOVE_SYNC) {
-        planner.synchronize();
-        SERIAL_ECHOLNPGM(MSG_Z_MOVE_COMP);
-      }
-    #endif
+  //  #if ENABLED(NANODLP_Z_SYNC)
+    //  #if ENABLED(NANODLP_ALL_AXIS)
+    //    #define _MOVE_SYNC parser.seenval('X') || parser.seenval('Y') || parser.seenval('Z')  // For any move wait and output sync message
+    //  #else
+      //  #define _MOVE_SYNC parser.seenval('Z')  // Only for Z move
+    //  #endif
+    //  if (_MOVE_SYNC) {
+    //    planner.synchronize();
+      //  SERIAL_ECHOLNPGM(MSG_Z_MOVE_COMP);
+    //  }
+  //  #endif
   }
 }

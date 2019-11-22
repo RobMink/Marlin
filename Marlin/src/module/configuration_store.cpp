@@ -37,7 +37,7 @@
  */
 
 // Change EEPROM version if the structure changes
-#define EEPROM_VERSION "V71"
+#define EEPROM_VERSION "V72"
 #define EEPROM_OFFSET 100
 
 // Check the integrity of data offsets.
@@ -223,8 +223,7 @@ typedef struct SettingsDataStruct {
     abc_float_t delta_endstop_adj;                      // M666 XYZ
     float delta_radius,                                 // M665 R
           delta_diagonal_rod,                           // M665 L
-          delta_segments_per_second,                    // M665 S
-          delta_calibration_radius;                     // M665 B
+          delta_segments_per_second;                    // M665 S
     abc_float_t delta_tower_angle_trim;                 // M665 XYZ
   #elif EITHER(X_DUAL_ENDSTOPS, Y_DUAL_ENDSTOPS) || Z_MULTI_ENDSTOPS
     float x2_endstop_adj,                               // M666 X
@@ -546,7 +545,7 @@ void MarlinSettings::postprocess() {
     {
       _FIELD_TEST(home_offset);
 
-    /*  #if HAS_SCARA_OFFSET
+      #if HAS_SCARA_OFFSET
         EEPROM_WRITE(scara_home_offset);
       #else
         #if !HAS_HOME_OFFSET
@@ -554,7 +553,7 @@ void MarlinSettings::postprocess() {
         #endif
         EEPROM_WRITE(home_offset);
       #endif
-*/
+
       #if HAS_HOTEND_OFFSET
         // Skip hotend 0 which must be 0
         for (uint8_t e = 1; e < HOTENDS; e++)
@@ -724,7 +723,6 @@ void MarlinSettings::postprocess() {
         EEPROM_WRITE(delta_radius);              // 1 float
         EEPROM_WRITE(delta_diagonal_rod);        // 1 float
         EEPROM_WRITE(delta_segments_per_second); // 1 float
-        EEPROM_WRITE(delta_calibration_radius);  // 1 float
         EEPROM_WRITE(delta_tower_angle_trim);    // 3 floats
 
       #elif EITHER(X_DUAL_ENDSTOPS, Y_DUAL_ENDSTOPS) || Z_MULTI_ENDSTOPS
@@ -1351,7 +1349,7 @@ void MarlinSettings::postprocess() {
       {
         _FIELD_TEST(home_offset);
 
-      /*  #if HAS_SCARA_OFFSET
+        #if HAS_SCARA_OFFSET
           EEPROM_READ(scara_home_offset);
         #else
           #if !HAS_HOME_OFFSET
@@ -1359,7 +1357,6 @@ void MarlinSettings::postprocess() {
           #endif
           EEPROM_READ(home_offset);
         #endif
-*/
       }
 
       //
@@ -1535,7 +1532,6 @@ void MarlinSettings::postprocess() {
           EEPROM_READ(delta_radius);              // 1 float
           EEPROM_READ(delta_diagonal_rod);        // 1 float
           EEPROM_READ(delta_segments_per_second); // 1 float
-          EEPROM_READ(delta_calibration_radius);  // 1 float
           EEPROM_READ(delta_tower_angle_trim);    // 3 floats
 
         #elif EITHER(X_DUAL_ENDSTOPS, Y_DUAL_ENDSTOPS) || Z_MULTI_ENDSTOPS
@@ -2271,12 +2267,12 @@ void MarlinSettings::reset() {
     planner.junction_deviation_mm = float(JUNCTION_DEVIATION_MM);
   #endif
 
-/*  #if HAS_SCARA_OFFSET
+  #if HAS_SCARA_OFFSET
     scara_home_offset.reset();
   #elif HAS_HOME_OFFSET
     home_offset.reset();
   #endif
-*/
+
   #if HAS_HOTEND_OFFSET
     reset_hotend_offsets();
   #endif
@@ -2376,7 +2372,6 @@ void MarlinSettings::reset() {
     delta_radius = DELTA_RADIUS;
     delta_diagonal_rod = DELTA_DIAGONAL_ROD;
     delta_segments_per_second = DELTA_SEGMENTS_PER_SECOND;
-    delta_calibration_radius = DELTA_CALIBRATION_RADIUS;
     delta_tower_angle_trim = dta;
 
   #elif EITHER(X_DUAL_ENDSTOPS, Y_DUAL_ENDSTOPS) || Z_MULTI_ENDSTOPS
@@ -2925,9 +2920,9 @@ void MarlinSettings::reset() {
       CONFIG_ECHO_START();
       SERIAL_ECHOLNPAIR(
           "  M665 S", delta_segments_per_second
-      //  , " P", scara_home_offset.a
-      //  , " T", scara_home_offset.b
-      //  , " Z", LINEAR_UNIT(scara_home_offset.z)
+        , " P", scara_home_offset.a
+        , " T", scara_home_offset.b
+        , " Z", LINEAR_UNIT(scara_home_offset.z)
       );
 
     #elif ENABLED(DELTA)
@@ -2940,14 +2935,13 @@ void MarlinSettings::reset() {
         , " Z", LINEAR_UNIT(delta_endstop_adj.c)
       );
 
-      CONFIG_ECHO_HEADING("Delta settings: L<diagonal_rod> R<radius> H<height> S<segments_per_s> B<calibration radius> XYZ<tower angle corrections>");
+      CONFIG_ECHO_HEADING("Delta settings: L<diagonal_rod> R<radius> H<height> S<segments_per_s> XYZ<tower angle corrections>");
       CONFIG_ECHO_START();
       SERIAL_ECHOLNPAIR(
           "  M665 L", LINEAR_UNIT(delta_diagonal_rod)
         , " R", LINEAR_UNIT(delta_radius)
         , " H", LINEAR_UNIT(delta_height)
         , " S", delta_segments_per_second
-        , " B", LINEAR_UNIT(delta_calibration_radius)
         , " X", LINEAR_UNIT(delta_tower_angle_trim.a)
         , " Y", LINEAR_UNIT(delta_tower_angle_trim.b)
         , " Z", LINEAR_UNIT(delta_tower_angle_trim.c)

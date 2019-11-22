@@ -408,7 +408,6 @@ private:
     static void G21();
   #endif
 
-
   #if ENABLED(G26_MESH_VALIDATION)
     static void G26();
   #endif

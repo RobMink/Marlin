@@ -291,9 +291,9 @@ void homeaxis(const AxisEnum axis);
  */
 
 #if IS_KINEMATIC // (DELTA or SCARA)
-//  #if HAS_SCARA_OFFSET
-  //  extern abc_pos_t scara_home_offset; // A and B angular offsets, Z mm offset
-//  #endif
+ #if HAS_SCARA_OFFSET
+   extern abc_pos_t scara_home_offset; // A and B angular offsets, Z mm offset
+  #endif
 
   // Return true if the given point is within the printable area
   inline bool position_is_reachable(const float &rx, const float &ry, const float inset=0) {

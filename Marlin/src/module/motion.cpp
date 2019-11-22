@@ -676,8 +676,8 @@ void restore_feedrate_and_scaling() {
 
     // If the move is only in Z/E don't split up the move
     if (!diff.x && !diff.y) {
-      planner.buffer_line(destination, scaled_fr_mm_s, active_extruder);
-      return false; // caller will update current_position
+     planner.buffer_line(destination, scaled_fr_mm_s, active_extruder);
+     return false; // caller will update current_position
     }
 
     // Fail if attempting move outside printable radius
