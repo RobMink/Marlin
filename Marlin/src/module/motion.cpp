@@ -70,7 +70,7 @@
 #define DEBUG_OUT ENABLED(DEBUG_LEVELING_FEATURE)
 #include "../core/debug_out.h"
 
-#define XYZ_CONSTS(T, NAME, OPT) const PROGMEM XYZval<T> NAME##_P = { X_##OPT, Y_##OPT, Z_##OPT }
+#define XYZ_CONSTS(T, NAME, OPT) const PROGMEM XYZval<T> NAME##_P = { X_##OPT }
 
 XYZ_CONSTS(float, base_min_pos,   MIN_POS);
 XYZ_CONSTS(float, base_max_pos,   MAX_POS);
@@ -99,7 +99,7 @@ bool relative_mode; // = false;
  *   Used by 'line_to_current_position' to do a move after changing it.
  *   Used by 'sync_plan_position' to update 'planner.position'.
  */
-xyze_pos_t current_position = { X_HOME_POS, Y_HOME_POS, Z_HOME_POS };
+xyze_pos_t current_position = { X_MAX_POS, Y_MIN_POS, Z_HOME_POS };
 
 /**
  * Cartesian Destination
@@ -1238,7 +1238,7 @@ feedRate_t get_homing_bump_feedrate(const AxisEnum axis) {
 /**
  * Home an individual linear axis
  */
-void do_homing_move(const AxisEnum axis, const float distance, const feedRate_t fr_mm_s=0.0) {
+void do_homing_move(const AxisEnum axis, const float distance, const feedRate_t fr_mm_s=20.0) {
 
   if (DEBUGGING(LEVELING)) {
     DEBUG_ECHOPAIR(">>> do_homing_move(", axis_codes[axis], ", ", distance, ", ");
@@ -1284,12 +1284,23 @@ void do_homing_move(const AxisEnum axis, const float distance, const feedRate_t 
   }
 
   const feedRate_t real_fr_mm_s = fr_mm_s ?: homing_feedrate(axis);
-  #if IS_SCARA
-    // Tell the planner the axis is at 0
-    current_position[axis] = 0;
-    sync_plan_position();
-    current_position[axis] = distance;
-    line_to_current_position(real_fr_mm_s);
+ #if IS_SCARA
+// SERIAL_ECHOLNPAIR("in scara do_homing");
+ //Tell the planner the axis is at 0
+    //current_position[axis] = 0;
+    //sync_plan_position();
+    //current_position[axis] = distance;
+    //line_to_current_position(real_fr_mm_s);
+
+    xyze_pos_t target = { planner.get_axis_position_mm(X_AXIS), 200, 200, 0 };
+    target[axis] = 0;
+    //current_position[axis] = distance;
+    planner.set_machine_position_mm(target);
+    target[axis] = 200;
+  //  SERIAL_ECHOLNPAIR("in scara do_homing, did this?");
+    planner.buffer_segment(target, real_fr_mm_s, active_extruder);
+    //SERIAL_ECHOLNPAIR("OOOKKKKK......");
+
   #else
     abce_pos_t target = { planner.get_axis_position_mm(A_AXIS), planner.get_axis_position_mm(B_AXIS), planner.get_axis_position_mm(C_AXIS), planner.get_axis_position_mm(E_AXIS) };
     target[axis] = 0;
@@ -1316,9 +1327,9 @@ void do_homing_move(const AxisEnum axis, const float distance, const feedRate_t 
     #if HOMING_Z_WITH_PROBE && QUIET_PROBING
       if (axis == Z_AXIS) probing_pause(false);
     #endif
-
+SERIAL_ECHOLNPAIR("in scara do_homing-validate");
     endstops.validate_homing_move();
-
+SERIAL_ECHOLNPAIR("in scara do_homing-post validate");
     // Re-enable stealthChop if used. Disable diag1 pin on driver.
     #if ENABLED(SENSORLESS_HOMING)
       end_sensorless_homing_per_axis(axis, stealth_states);
@@ -1441,11 +1452,8 @@ void set_axis_is_not_at_home(const AxisEnum axis) {
 
 void homeaxis(const AxisEnum axis) {
 
-  #if IS_SCARA
-    // Only Z homing (with probe) is permitted
-    if (axis != Z_AXIS) { BUZZ(100, 880); return; }
-  #else
-    #define _CAN_HOME(A) \
+SERIAL_ECHOLNPAIR("in homeaxis");
+/*   #define _CAN_HOME(A) \
       (axis == _AXIS(A) && ((A##_MIN_PIN > -1 && A##_HOME_DIR < 0) || (A##_MAX_PIN > -1 && A##_HOME_DIR > 0)))
     #if X_SPI_SENSORLESS
       #define CAN_HOME_X true
@@ -1463,10 +1471,10 @@ void homeaxis(const AxisEnum axis) {
       #define CAN_HOME_Z _CAN_HOME(Z)
     #endif
     if (!CAN_HOME_X && !CAN_HOME_Y && !CAN_HOME_Z) return;
-  #endif
+
 
   if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR(">>> homeaxis(", axis_codes[axis], ")");
-
+*/
   const int axis_home_dir = (
     #if ENABLED(DUAL_X_CARRIAGE)
       axis == X_AXIS ? x_home_dir(active_extruder) :
@@ -1502,6 +1510,7 @@ void homeaxis(const AxisEnum axis) {
   #if HOMING_Z_WITH_PROBE && ENABLED(BLTOUCH)
     if (axis == Z_AXIS && bltouch.deploy()) return; // The initial DEPLOY
   #endif
+  SERIAL_ECHOLNPAIR("are we getting here in homeaxis?");
 
   do_homing_move(axis, 1.5f * max_length(
     #if ENABLED(DELTA)
@@ -1511,7 +1520,7 @@ void homeaxis(const AxisEnum axis) {
     #endif
     ) * axis_home_dir
   );
-
+/*
   #if HOMING_Z_WITH_PROBE && ENABLED(BLTOUCH) && DISABLED(BLTOUCH_HS_MODE)
     if (axis == Z_AXIS) bltouch.stow(); // Intermediate STOW (in LOW SPEED MODE)
   #endif
@@ -1645,10 +1654,14 @@ void homeaxis(const AxisEnum axis) {
       default: break;
     }
   #endif
-
+*/
   #if IS_SCARA
+  SERIAL_ECHOLNPAIR("in scara in homeaxis");
 
-    set_axis_is_at_home(axis);
+//  do_homing_move(axis, 1.5f * max_length(axis));
+
+//do_homing_move(axis,200, 1000 );
+    scara_set_axis_is_at_home(axis);
     sync_plan_position();
 
   #elif ENABLED(DELTA)

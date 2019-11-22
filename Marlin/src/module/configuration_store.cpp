@@ -546,7 +546,7 @@ void MarlinSettings::postprocess() {
     {
       _FIELD_TEST(home_offset);
 
-      #if HAS_SCARA_OFFSET
+    /*  #if HAS_SCARA_OFFSET
         EEPROM_WRITE(scara_home_offset);
       #else
         #if !HAS_HOME_OFFSET
@@ -554,7 +554,7 @@ void MarlinSettings::postprocess() {
         #endif
         EEPROM_WRITE(home_offset);
       #endif
-
+*/
       #if HAS_HOTEND_OFFSET
         // Skip hotend 0 which must be 0
         for (uint8_t e = 1; e < HOTENDS; e++)
@@ -1351,7 +1351,7 @@ void MarlinSettings::postprocess() {
       {
         _FIELD_TEST(home_offset);
 
-        #if HAS_SCARA_OFFSET
+      /*  #if HAS_SCARA_OFFSET
           EEPROM_READ(scara_home_offset);
         #else
           #if !HAS_HOME_OFFSET
@@ -1359,6 +1359,7 @@ void MarlinSettings::postprocess() {
           #endif
           EEPROM_READ(home_offset);
         #endif
+*/
       }
 
       //
@@ -2270,12 +2271,12 @@ void MarlinSettings::reset() {
     planner.junction_deviation_mm = float(JUNCTION_DEVIATION_MM);
   #endif
 
-  #if HAS_SCARA_OFFSET
+/*  #if HAS_SCARA_OFFSET
     scara_home_offset.reset();
   #elif HAS_HOME_OFFSET
     home_offset.reset();
   #endif
-
+*/
   #if HAS_HOTEND_OFFSET
     reset_hotend_offsets();
   #endif
@@ -2924,9 +2925,9 @@ void MarlinSettings::reset() {
       CONFIG_ECHO_START();
       SERIAL_ECHOLNPAIR(
           "  M665 S", delta_segments_per_second
-        , " P", scara_home_offset.a
-        , " T", scara_home_offset.b
-        , " Z", LINEAR_UNIT(scara_home_offset.z)
+      //  , " P", scara_home_offset.a
+      //  , " T", scara_home_offset.b
+      //  , " Z", LINEAR_UNIT(scara_home_offset.z)
       );
 
     #elif ENABLED(DELTA)

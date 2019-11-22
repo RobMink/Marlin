@@ -54,7 +54,7 @@
 #define DEBUG_OUT ENABLED(DEBUG_LEVELING_FEATURE)
 #include "../../core/debug_out.h"
 
-#if ENABLED(QUICK_HOME)
+/*#if ENABLED(QUICK_HOME)
 
   static void quick_home_xy() {
 
@@ -109,8 +109,8 @@
     #endif
   }
 
-#endif // QUICK_HOME
-
+/*///#endif // QUICK_HOME
+/*
 #if ENABLED(Z_SAFE_HOMING)
 
   inline void home_z_safely() {
@@ -130,6 +130,7 @@
      * Move the Z probe (or just the nozzle) to the safe homing point
      * (Z is already at the right height)
      */
+/*
     destination.set(safe_homing_xy, current_position.z);
 
     #if HOMING_Z_WITH_PROBE
@@ -161,7 +162,9 @@
   }
 
 #endif // Z_SAFE_HOMING
+*/
 
+/*
 #if ENABLED(IMPROVE_HOMING_RELIABILITY)
 
   slow_homing_t begin_slow_homing() {
@@ -188,6 +191,8 @@
   }
 
 #endif // IMPROVE_HOMING_RELIABILITY
+*/
+
 
 /**
  * G28: Home all axes according to settings
@@ -209,7 +214,33 @@
  *
  */
 void GcodeSuite::G28(const bool always_home_all) {
-  if (DEBUGGING(LEVELING)) {
+planner.synchronize();
+remember_feedrate_scaling_off();
+
+endstops.enable(true);
+
+  SERIAL_ECHOLNPAIR("Got Here");
+  //const bool homeX = parser.seen('X'), homeY = parser.seen('Y'), homeZ = parser.seen('Z'),
+    //         home_all = always_home_all || (homeX == homeY && homeX == homeZ),
+    //         doX = home_all || homeX, doY = home_all || homeY, doZ = home_all || homeZ;
+
+  //destination = current_position;
+
+  #if Z_HOME_DIR > 0  // If homing away from BED do Z first
+SERIAL_ECHOLNPAIR("home Z+");
+     homeaxis(Z_AXIS);
+SERIAL_ECHOLNPAIR("finshed Z");
+  #endif
+  SERIAL_ECHOLNPAIR("home X");
+
+     homeaxis(Y_AXIS);
+SERIAL_ECHOLNPAIR("finished home X");
+  #if Z_HOME_DIR < 0  // If homing away from BED do Z first
+
+       homeaxis(Z_AXIS);
+SERIAL_ECHOLNPAIR("Home Z-");
+  #endif
+/*  if (DEBUGGING(LEVELING)) {
     DEBUG_ECHOLNPGM(">>> G28");
     log_machine_info();
   }
@@ -235,11 +266,13 @@ void GcodeSuite::G28(const bool always_home_all) {
     if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("> homing not needed, skip\n<<< G28");
     return;
   }
-
+*/
   // Wait for planner moves to finish!
-  planner.synchronize();
+
 
   // Disable the leveling matrix before homing
+
+/*
   #if HAS_LEVELING
 
     // Cancel the active G29 session
@@ -306,11 +339,9 @@ void GcodeSuite::G28(const bool always_home_all) {
   #if HAS_DUPLICATION_MODE
     extruder_duplication_enabled = false;
   #endif
-
-  remember_feedrate_scaling_off();
-
-  endstops.enable(true); // Enable endstops for next homing move
-
+*/
+ // Enable endstops for next homing move
+/*
   #if ENABLED(DELTA)
 
     home_delta();
@@ -319,8 +350,27 @@ void GcodeSuite::G28(const bool always_home_all) {
     #if ENABLED(IMPROVE_HOMING_RELIABILITY)
       end_slow_homing(slow_homing);
     #endif
+  //#elseif ENABLED(MORGAN_SCARA)
+  SERIAL_ECHOLNPAIR("Got Here");
+  const bool homeX = parser.seen('X'), homeY = parser.seen('Y'), homeZ = parser.seen('Z'),
+             home_all = always_home_all || (homeX == homeY && homeX == homeZ),
+             doX = home_all || homeX, doY = home_all || homeY, doZ = home_all || homeZ;
 
-  #else // NOT DELTA
+  destination = current_position;
+
+  #if Z_HOME_DIR > 0  // If homing away from BED do Z first
+
+    if (doZ) homeaxis(Z_AXIS);
+
+  #endif
+      if (doX||doY) homeaxis(Y_AXIS);
+
+      #if Z_HOME_DIR < 0  // If homing away from BED do Z first
+
+        if (doZ) homeaxis(Z_AXIS);
+
+      #endif
+  #else // NOT DELTA or SCARA
 
     const bool homeX = parser.seen('X'), homeY = parser.seen('Y'), homeZ = parser.seen('Z'),
                home_all = always_home_all || (homeX == homeY && homeX == homeZ),
@@ -352,7 +402,7 @@ void GcodeSuite::G28(const bool always_home_all) {
 
     #if ENABLED(QUICK_HOME)
 
-      if (doX && doY) quick_home_xy();
+    //  if (doX && doY) quick_home_xy();
 
     #endif
 
@@ -437,6 +487,10 @@ void GcodeSuite::G28(const bool always_home_all) {
    * then print a standard GCode file that contains a single print that does a G28 and has no other
    * IDEX specific commands in it.
    */
+
+
+
+  /*
   #if ENABLED(DUAL_X_CARRIAGE)
 
     if (dxc_is_duplicating()) {
@@ -470,9 +524,9 @@ void GcodeSuite::G28(const bool always_home_all) {
     }
 
   #endif // DUAL_X_CARRIAGE
-
+*/
   endstops.not_homing();
-
+/*
   // Clear endstop state for polled stallGuard endstops
   #if ENABLED(SPI_ENDSTOPS)
     endstops.clear_endstop_state();
@@ -520,10 +574,12 @@ void GcodeSuite::G28(const bool always_home_all) {
     process_subcommands_now_P(PSTR("M569S1XY"));
   #endif
 
+  */
+SERIAL_ECHOLNPAIR("Are we even getting here?");
   ui.refresh();
-
+SERIAL_ECHOLNPAIR("or here?");
   report_current_position();
-
+SERIAL_ECHOLNPAIR("or even here?");
   #if ENABLED(NANODLP_Z_SYNC)
     #if ENABLED(NANODLP_ALL_AXIS)
       #define _HOME_SYNC true       // For any axis, output sync text.
